@@ -7,6 +7,8 @@ package dojoarvoreb;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,10 +96,111 @@ public class ArvoreB {
      * @param nomeArquivoDados nome do arquivo de dados que contém a arvore B)
      * @return endereço da folha onde o cliente foi inserido, -1 se não conseguiu inserir
      */
-    public int insere(int codCli, String nomeCli, String nomeArquivoMetadados, String nomeArquivoDados) throws Exception {
-        //TODO: Inserir aqui o código do algoritmo de inserção        
-        return Integer.MAX_VALUE;
+    
+    
+    private void particiona(String nomeArquivoMetadados, No no, int pontFilhoMenor, RandomAccessFile ArqNos) throws Exception{
+                RandomAccessFile ArqMeta = new RandomAccessFile(new File(nomeArquivoMetadados), "rw");
+                Metadados meta = Metadados.le(ArqMeta);
                 
+                ArqNos.seek(meta.pontProxNoLivre);
+                No novoNo = new No();
+                int pontFilhoMaior = meta.pontProxNoLivre;
+                meta.pontProxNoLivre = No.TAMANHO*2;
+                
+                for (int i = No.d+1; i < no.clientes.size(); i++) {
+                    novoNo.clientes.add(no.clientes.get(i));
+                    novoNo.p.add(-1);                   
+                }
+                novoNo.p.add(-1);
+                novoNo.m = novoNo.clientes.size();
+
+                for (int i = 0; i < No.d; i++) {
+                    no.clientes.remove(No.d+1);
+                    no.p.remove(No.d+1);
+                }
+                no.m = no.clientes.size();
+                No pai = null;
+                if(no.pontPai<0){ //então o nó é raiz
+                    
+                   int novoPontRaiz = meta.pontProxNoLivre;
+                   meta.pontProxNoLivre = No.TAMANHO*3;
+                   meta.pontRaiz = novoPontRaiz;
+                   
+                   ArqMeta.seek(0);
+                   meta.salva(ArqMeta);
+                   ArqMeta.close();
+                   
+                   
+                   pai = new No();
+                   no.pontPai=novoPontRaiz;
+                   novoNo.pontPai = no.pontPai;
+                   pai.p.add(pontFilhoMenor);
+                }
+                
+                else {
+                    ArqNos.seek(no.pontPai);
+                    pai = No.le(ArqNos);
+                }
+                
+                int posCerta = 0; //achar posição ordenada para o cliente q vai subir
+                for (int i = 0; i < pai.m; i++) {
+                  if(no.clientes.get(No.d).codCliente > pai.clientes.get(i).codCliente){
+                    posCerta++;
+                  }
+            
+                }
+                pai.clientes.add(posCerta, no.clientes.get(No.d)); 
+                no.clientes.remove(No.d);
+                no.p.remove(No.d);
+                no.m = no.clientes.size();
+                novoNo.pontPai = no.pontPai;
+                pai.p.add(posCerta+1, pontFilhoMaior);
+                pai.m = pai.clientes.size();
+                no.m=no.clientes.size();
+                ArqNos.seek(pontFilhoMaior);
+                novoNo.salva(ArqNos);
+                ArqNos.seek(pontFilhoMenor);
+                no.salva(ArqNos);
+                pontFilhoMenor = no.pontPai;
+                ArqNos.seek(pontFilhoMenor);
+                pai.salva(ArqNos);
+                
+                if(pai.clientes.size()> 2*No.d){//verificar se a página/nó ficou cheio
+                    particiona(nomeArquivoMetadados, pai, pontFilhoMenor, ArqNos);
+            }
+                
+    };
+    
+    
+    public int insere(int codCli, String nomeCli, String nomeArquivoMetadados, String nomeArquivoDados) throws Exception {
+        //TODO: Inserir aqui o código do algoritmo de inserção
+        
+        ResultBusca busca = busca(codCli, nomeArquivoMetadados, nomeArquivoDados);
+        if(busca.encontrou){
+            return -1; //retornar -1 pq nao inseriu, ou retornar a pos que o cliente tá?
+        }
+        else{
+            Cliente monique = new Cliente(codCli, nomeCli);
+            RandomAccessFile ArqNos = new RandomAccessFile(new File(nomeArquivoDados), "rw");
+            
+            ArqNos.seek(busca.pont);
+            int pontFilhoMenor = busca.pont;
+            No no = No.le(ArqNos);
+            no.clientes.add(busca.pos, monique);//inseri o cliente na posição aonde a busca assinalou.  
+            no.m = no.m +1;//??
+            no.p.add(-1);
+            
+            
+            if(no.clientes.size()> 2*No.d){//verificar se a página/nó ficou cheio
+                particiona(nomeArquivoMetadados, no, pontFilhoMenor, ArqNos);
+            }
+            ArqNos.seek(busca.pont);
+            no.salva(ArqNos);
+            ArqNos.close();
+            return busca.pont;
+            
+        }
+       
     }
 
     /**

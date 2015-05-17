@@ -316,7 +316,7 @@ public class ArvoreBTest {
     /**
      * Testa busca 
      */
-    @Test
+    //@Test
     public void testaBusca1() throws FileNotFoundException, Exception {
         montaArvoreH1();
 
@@ -330,7 +330,7 @@ public class ArvoreBTest {
     /**
      * Testa busca
      */
-    @Test
+    //@Test
     public void testaBusca2() throws FileNotFoundException, Exception {
         montaArvoreH1();
         //Testa busca -- chave procurada não está na árvore. Raiz é um nó folha
@@ -343,7 +343,7 @@ public class ArvoreBTest {
     /**
      * Testa busca
      */
-    @Test
+    //@Test
     public void testaBusca3() throws FileNotFoundException, Exception {        
         montaArvoreH2();
         //Testa busca -- chave está na árvore
@@ -356,7 +356,7 @@ public class ArvoreBTest {
     /**
      * Testa busca
      */
-    @Test
+    //@Test
     public void testaBusca4() throws FileNotFoundException, Exception {
         montaArvoreH2();
 
@@ -370,7 +370,7 @@ public class ArvoreBTest {
     /**
      * Testa busca
      */
-    @Test
+    //@Test
     public void testaBusca5() throws FileNotFoundException, Exception {
         montaArvoreH3();
 
@@ -384,7 +384,7 @@ public class ArvoreBTest {
     /**
      * Testa busca
      */
-    @Test
+    //@Test
     public void testaBusca6() throws FileNotFoundException, Exception {
         montaArvoreH3();
 
@@ -398,7 +398,7 @@ public class ArvoreBTest {
     /**
      * Testa inserção em árvore de altura H=1, sem particionamento
      */
-    //@Test
+    @Test
     public void testaInsere1() throws FileNotFoundException, Exception {
         montaArvoreH1();
         
